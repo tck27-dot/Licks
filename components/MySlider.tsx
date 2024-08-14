@@ -29,7 +29,7 @@ export default function MySlider({ duration, onImgGenerated }: Props) {
       const renderImage = async () => {
         try {
           const { uri } = await VideoThumbnails.getThumbnailAsync(
-            "https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4",
+            "https://d49cod5usxzn4.cloudfront.net/Beat%20it%20Solo%20MJ%20&%20Eddie%20Van%20Halen.mp4",
             {
               time: 0,
             }
@@ -47,7 +47,8 @@ export default function MySlider({ duration, onImgGenerated }: Props) {
     const generateThumbnail = async () => {
       try {
         const { uri } = await VideoThumbnails.getThumbnailAsync(
-          "https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4",
+          "https://d49cod5usxzn4.cloudfront.net/Beat%20it%20Solo%20MJ%20&%20Eddie%20Van%20Halen.mp4",
+
           {
             time: value,
           }
@@ -202,7 +203,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#334488",
   },
   image: {
-    width: 300,
-    height: 600,
+    width: 260,
+    height: 480,
   },
 });

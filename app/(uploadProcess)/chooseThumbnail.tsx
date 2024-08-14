@@ -1,4 +1,12 @@
-import { View, Text, Button, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as DocumentPicker from "expo-document-picker";
@@ -142,6 +150,7 @@ export default function chooseThumbnail() {
 
   function handleImage(image: string) {
     setImage(image);
+    console.log(image);
   }
 
   return (
@@ -150,11 +159,22 @@ export default function chooseThumbnail() {
       start={{ x: 0.1, y: 0.2 }}
       style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
     >
-      <SafeAreaView>
-        <Text className="text-center mt-3 text-2xl font-normal text-white">
+      <SafeAreaView className="flex-1  justify-center">
+        <Text className="text-center mt-3 text-2xl font-bold text-white">
           Choose Thumbnail
         </Text>
+        <Text>
+          Adjust the slider to scrub through video to choose a momement to
+          thumbnail!
+        </Text>
         <MySlider duration={27000} onImgGenerated={handleImage} />
+
+        <TouchableOpacity className="bg-[#833ab4] mt-4 p-2 rounded-lg">
+          <Text className="text-center text-base text-white">
+            Choose and continue
+          </Text>
+        </TouchableOpacity>
+        <ActivityIndicator animating={false} />
         <Button
           title={"Sitemap"}
           onPress={() => router.navigate("/_sitemap")}
@@ -279,7 +299,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#334488",
   },
   image: {
-    width: 300,
-    height: 600,
+    width: "75%",
+    height: "10%",
+  },
+  test_image: {
+    width: "75%",
+    height: "75%",
   },
 });
