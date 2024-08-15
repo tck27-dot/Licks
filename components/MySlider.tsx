@@ -1,4 +1,11 @@
-import { View, Text, Button, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  Image,
+  Dimensions,
+} from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as DocumentPicker from "expo-document-picker";
@@ -12,6 +19,7 @@ import Slider, {
   MarkerProps,
   SliderProps,
 } from "@react-native-community/slider";
+import { Video, ResizeMode } from "expo-av";
 
 interface Props {
   duration: number;
@@ -35,7 +43,6 @@ export default function MySlider({ duration, onImgGenerated }: Props) {
             }
           );
           setImage(uri);
-          // toggleShown(false);
         } catch (e) {
           console.warn(e);
         }
@@ -66,11 +73,24 @@ export default function MySlider({ duration, onImgGenerated }: Props) {
   }, [image, onImgGenerated]);
 
   const SliderExample = (props: SliderProps) => {
+    const [status, setStatus] = useState<any>(null);
+    const video = useRef<any>(null);
     return (
       <View style={{ alignItems: "center" }}>
-        {/* <Text style={styles.text}>{value && +value.toFixed(3)}</Text> */}
-
-        {image && <Image style={styles.image} source={{ uri: image }} />}
+        <Video
+          ref={video}
+          source={{
+            uri: "https://d49cod5usxzn4.cloudfront.net/Beat%20it%20Solo%20MJ%20&%20Eddie%20Van%20Halen.mp4",
+          }}
+          style={styles.video}
+          isLooping
+          isMuted
+          shouldPlay={false}
+          resizeMode={ResizeMode.COVER}
+          useNativeControls={false}
+          onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+        />
+        <Text className="text-white text-xl">{value}</Text>
         <Slider
           step={500}
           style={[styles.slider, props.style]}
@@ -78,8 +98,14 @@ export default function MySlider({ duration, onImgGenerated }: Props) {
           value={value}
           maximumValue={duration ? Number(duration) : 0}
           minimumValue={0}
-          onSlidingComplete={(value) => {
-            setValue(value);
+          onValueChange={async (value) => {
+            if (video.current) {
+              try {
+                await video.current.setPositionAsync(value);
+              } catch (e) {
+                console.log(e);
+              }
+            }
           }}
         />
       </View>
@@ -89,6 +115,16 @@ export default function MySlider({ duration, onImgGenerated }: Props) {
 }
 
 const styles = StyleSheet.create({
+  video: {
+    width: 260,
+    height: 480,
+    borderRadius: 24,
+  },
+  VideoContainer: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height - 79,
+    zIndex: 0,
+  },
   text: {
     fontSize: 14,
     textAlign: "center",

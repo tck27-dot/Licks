@@ -132,55 +132,59 @@ export default function chooseVid() {
   }
 
   return (
-    <LinearGradient
-      colors={["#833ab4", "#8589d6", "#fcb045"]}
-      start={{ x: 0.1, y: 0.2 }}
-      style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+    // <LinearGradient
+    //   colors={["#833ab4", "#8589d6", "#fcb045"]}
+    //   start={{ x: 0.1, y: 0.2 }}
+    //   style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+    // >
+    <SafeAreaView
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "black",
+      }}
     >
-      <SafeAreaView
-        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      <TouchableOpacity
+        onPress={() => {
+          Alert.alert("Exiting Upload", "Are you sure you want to quit?", [
+            {
+              text: "Yes",
+              onPress: () => router.navigate("../(tabs)/home"),
+              style: "cancel",
+            },
+            {
+              text: "No",
+              style: "cancel",
+            },
+          ]);
+        }}
+        style={{ position: "absolute", top: "5%", left: "0%" }}
+        className="bg-[#fcb045] mt-4 p-1 rounded-lg w-1/4"
       >
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert("Exiting Upload", "Are you sure you want to quit?", [
-              {
-                text: "Yes",
-                onPress: () => router.navigate("../(tabs)/home"),
-                style: "cancel",
-              },
-              {
-                text: "No",
-                style: "cancel",
-              },
-            ]);
-          }}
-          style={{ position: "absolute", top: "5%", left: "0%" }}
-          className="bg-[#fcb045] mt-4 p-1 rounded-lg w-1/4"
-        >
-          <Text className="text-center text-base text-white">Quit</Text>
-        </TouchableOpacity>
+        <Text className="text-center text-base text-white">Quit</Text>
+      </TouchableOpacity>
 
-        <Text className="text-center mt-3 text-2xl font-normal text-white">
-          Which video would you like to upload?
+      <Text className="text-center mt-3 text-2xl font-normal text-white px-7 py-7">
+        Select a video to upload
+      </Text>
+
+      <TouchableOpacity
+        onPress={async () => {
+          await pickImage();
+          console.log("*******************");
+          // router.navigate("/uploadSheetMusic");
+        }}
+        className="bg-[#833ab4] mt-4 rounded-lg w-1/2 p-2"
+      >
+        <Text className="text-center text-base text-white ">
+          Open Camera Roll
         </Text>
+      </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={async () => {
-            await pickImage();
-            console.log("*******************");
-            // router.navigate("/uploadSheetMusic");
-          }}
-          className="bg-[#833ab4] mt-4 p-2 rounded-lg w-1/2"
-        >
-          <Text className="text-center text-base text-white">Choose Video</Text>
-        </TouchableOpacity>
-
-        <Button
-          title={"Sitemap"}
-          onPress={() => router.navigate("/_sitemap")}
-        />
-      </SafeAreaView>
-    </LinearGradient>
+      <Button title={"Sitemap"} onPress={() => router.navigate("/_sitemap")} />
+    </SafeAreaView>
+    // </LinearGradient>
   );
 }
 

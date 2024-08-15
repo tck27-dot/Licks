@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  Pressable,
 } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -33,10 +34,9 @@ export default function chooseThumbnail() {
   });
   const [postID, setPostID] = useState<string | null>(null);
   const [duration, setDuration] = useState<string | null>(null);
-
   const [image, setImage] = useState<string | null>(null);
-
   const params = useGlobalSearchParams<{ postID: string; duration: string }>();
+  const [isLoading, toggleLoading] = useState<boolean>(false);
 
   useEffect(() => {
     // Update the state with the postID value
@@ -46,86 +46,6 @@ export default function chooseThumbnail() {
     }
   }, [params]);
   console.log("From chooseThumbnail: ", postID, duration);
-  const [file_uri, setfile_uri] = useState("");
-  //Generating Thumbnail
-  // const generateThumbnail = useCallback(async () => {
-  //   try {
-  //     const { uri } = await VideoThumbnails.getThumbnailAsync(
-  //       "https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4",
-  //       {
-  //         time: value,
-  //       }
-  //     );
-  //     setImage(uri);
-  //     console.log(value);
-  //   } catch (e) {
-  //     console.warn(e);
-  //   }
-  // }, [value]);
-  // const pickDoc = async () => {
-  //   let result = await DocumentPicker.getDocumentAsync();
-  //   console.log(result);
-  //   if (result.canceled) {
-  //     console.log("error");
-  //   }
-  //   if (!result.canceled) {
-  //     const resp = await fetch(result.assets[0].uri);
-  //     const blob = await resp.blob();
-  //     const uri = await putMedia(blob);
-  //     postID && (await thumbnailUriToDB(uri, postID));
-  //     postID && router.setParams({ postID: postID });
-  //     console.log("From sheetmusic: *******************");
-  //     router.push(`./uploadSheetMusic?postID=${postID}`);
-  //   }
-  // };
-
-  // async function putMedia(image: Blob) {
-  //   let { url } = await fetch("http://192.168.50.70:8084/s3Url").then((res) =>
-  //     res.json()
-  //   );
-
-  //   const params = {
-  //     method: "PUT",
-  //     headers: {
-  //       "Content-Type": image.type,
-  //     },
-  //     body: image,
-  //   };
-
-  //   const result = await fetch(url, params)
-  //     .then((res) => console.log(res))
-  //     .then((res) => setfile_uri(url.split("?")[0]))
-  //     .catch((err) => console.log(err));
-  //   console.log("View img here: ", url.split("?")[0]);
-  //   const uri: string = url.split("?")[0];
-  //   return uri;
-  // }
-
-  // async function thumbnailUriToDB(uri: string, postID: string) {
-  //   try {
-  //     const result = await fetch("http://192.168.50.70:8084/update_thumbnail", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         PostID: postID,
-  //         Uri: uri,
-  //       }),
-  //     })
-  //       .then((result) => {
-  //         if (result.ok) {
-  //           console.log(201);
-  //           return result.json();
-  //         }
-  //       })
-  //       .then((res) => {
-  //         console.log(res);
-  //         // router.setParams({ postID: res[0].insertId });
-  //       });
-  //   } catch (error) {
-  //     console.log("DB upload error: ", error);
-  //   }
-  // }
-
   const SliderExample = (props: SliderProps) => {
     const [value, setValue] = useState(0);
     return (
@@ -154,33 +74,39 @@ export default function chooseThumbnail() {
   }
 
   return (
-    <LinearGradient
-      colors={["#833ab4", "#8589d6", "#fcb045"]}
-      start={{ x: 0.1, y: 0.2 }}
-      style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-    >
-      <SafeAreaView className="flex-1  justify-center">
-        <Text className="text-center mt-3 text-2xl font-bold text-white">
-          Choose Thumbnail
-        </Text>
-        <Text>
-          Adjust the slider to scrub through video to choose a momement to
-          thumbnail!
-        </Text>
-        <MySlider duration={27000} onImgGenerated={handleImage} />
+    // <LinearGradient
+    //   colors={["#833ab4", "#8589d6", "#fcb045"]}
+    //   start={{ x: 0.1, y: 0.2 }}
+    //   style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+    // >
+    <SafeAreaView className="flex-1  justify-center center bg-black">
+      <Text className="text-center mt-3 text-2xl font-bold text-white">
+        Choose Thumbnail
+      </Text>
+      <Text className="text-center font-medium text-xs px-7 py-4 text-[#bebcbc]">
+        Adjust the slider to find a moment to thumbnail
+      </Text>
+      <MySlider duration={38000} onImgGenerated={handleImage} />
 
-        <TouchableOpacity className="bg-[#833ab4] mt-4 p-2 rounded-lg">
-          <Text className="text-center text-base text-white">
-            Choose and continue
-          </Text>
-        </TouchableOpacity>
-        <ActivityIndicator animating={false} />
-        <Button
-          title={"Sitemap"}
-          onPress={() => router.navigate("/_sitemap")}
+      <Pressable
+        onPress={() => toggleLoading(true)}
+        className="bg-[#833ab4] mt-4 p-2 rounded-lg my-0 mx-auto w-2/3"
+      >
+        <Text className="text-center text-base text-white">
+          Choose and continue
+        </Text>
+      </Pressable>
+
+      {isLoading && (
+        <ActivityIndicator
+          size={"large"}
+          className="py-2"
+          animating={isLoading}
         />
-      </SafeAreaView>
-    </LinearGradient>
+      )}
+      <Button title={"Sitemap"} onPress={() => router.navigate("/_sitemap")} />
+    </SafeAreaView>
+    // </LinearGradient>
   );
 }
 
