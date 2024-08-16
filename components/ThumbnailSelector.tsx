@@ -23,54 +23,90 @@ import { Video, ResizeMode } from "expo-av";
 
 interface Props {
   duration: number;
-  onImgGenerated: (image: string) => void;
+  onImgGenerated: (image: string) => string;
+  shouldShouldSubmit: boolean;
+  postID: string;
+  vidUri: string;
 }
-export default function MySlider({ duration, onImgGenerated }: Props) {
+export default function ThumbnailSelector({
+  duration,
+  onImgGenerated,
+  shouldShouldSubmit,
+  postID,
+  vidUri,
+}: Props) {
   const [value, setValue] = useState(0);
   const [image, setImage] = useState<string | null>(null);
   const [isShown, toggleShown] = useState<boolean>(true);
   const isFirstRender = useRef(true);
+  useEffect(() => {
+    image && onImgGenerated(image);
+  }, [image, onImgGenerated]);
 
-  //Generating Thumbnail
+  //Main hook to run DB upload request
   useEffect(() => {
     if (isFirstRender.current) {
-      const renderImage = async () => {
-        try {
-          const { uri } = await VideoThumbnails.getThumbnailAsync(
-            "https://d49cod5usxzn4.cloudfront.net/Beat%20it%20Solo%20MJ%20&%20Eddie%20Van%20Halen.mp4",
-            {
-              time: 0,
-            }
-          );
-          setImage(uri);
-        } catch (e) {
-          console.warn(e);
-        }
-      };
-      renderImage();
+      console.log("***********************");
+      console.log("First render!!");
       isFirstRender.current = false;
       return;
     }
-    const generateThumbnail = async () => {
+    const thumbnailToDb = async (postID: string) => {
       try {
+        //Generate Thumbnail
         const { uri } = await VideoThumbnails.getThumbnailAsync(
-          "https://d49cod5usxzn4.cloudfront.net/Beat%20it%20Solo%20MJ%20&%20Eddie%20Van%20Halen.mp4",
+          vidUri,
 
           {
             time: value,
           }
         );
-        setImage(uri);
+        const resp = await fetch(uri);
+        const blob = await resp.blob();
+
+        //Upload Blob to S3
+        let { url } = await fetch("http://192.168.50.70:8084/s3Url").then(
+          (res) => res.json()
+        );
+
+        const params1 = {
+          method: "PUT",
+          headers: {
+            "Content-Type": blob.type,
+          },
+          body: blob,
+        };
+
+        const result = await fetch(url, params1);
+        const finalUri = url.split("?")[0];
+
+        //DB Upload - Must have final uri!!
+        const params = {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ThumbnailUri: finalUri,
+            PostID: postID,
+          }),
+        };
+        const result2 = await fetch(
+          "http://192.168.50.70:8084/update_thumbnail",
+          params
+        );
+
+        if (!result2.ok) {
+          throw new Error("request failed");
+        }
       } catch (e) {
-        console.warn(e);
+        console.log(e);
       }
     };
-    generateThumbnail();
-  }, [value]);
+    thumbnailToDb(postID);
+    router.setParams({ postID: postID });
+    router.push(`/uploadSheetMusic?postID=${postID}`);
+  }, [shouldShouldSubmit]);
 
-  useEffect(() => {
-    image && onImgGenerated(image);
-  }, [image, onImgGenerated]);
+  console.log("From slider: ", shouldShouldSubmit);
 
   const SliderExample = (props: SliderProps) => {
     const [status, setStatus] = useState<any>(null);
@@ -80,7 +116,7 @@ export default function MySlider({ duration, onImgGenerated }: Props) {
         <Video
           ref={video}
           source={{
-            uri: "https://d49cod5usxzn4.cloudfront.net/Beat%20it%20Solo%20MJ%20&%20Eddie%20Van%20Halen.mp4",
+            uri: vidUri,
           }}
           style={styles.video}
           isLooping
@@ -96,7 +132,7 @@ export default function MySlider({ duration, onImgGenerated }: Props) {
           style={[styles.slider, props.style]}
           {...props}
           value={value}
-          maximumValue={duration ? Number(duration) : 0}
+          maximumValue={duration}
           minimumValue={0}
           onValueChange={async (value) => {
             if (video.current) {

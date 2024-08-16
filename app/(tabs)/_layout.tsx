@@ -11,7 +11,7 @@ export default function TabLayout() {
           tabBarActiveTintColor: "white",
           tabBarStyle: styles.container,
         }}
-        initialRouteName="profile"
+        initialRouteName="home"
       >
         <Tabs.Screen
           name="home"

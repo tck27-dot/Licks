@@ -44,7 +44,7 @@ export const auth = getAuth(app);
 // writeDailySpecial();
 export default function Layout() {
   return (
-    <Stack initialRouteName="(uploadProcess)">
+    <Stack initialRouteName="index">
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ headerShown: false }} />

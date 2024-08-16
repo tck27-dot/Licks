@@ -268,10 +268,15 @@ export const postData = async(db_id)=>{
 }
 
 export const update_thumbnail = async (post_id,uri)=>{
-    const result = await pool.query(`
+    const [result] = await pool.query(`
         UPDATE post_media
-        SET sheet_music_file = ?
+        SET thumbnail_file = ?
         WHERE post_id = ?
         `,[uri,post_id])
-    return result
+    const [result2] = await pool.query(`
+        UPDATE post_media
+        SET media_file = CONCAT(media_file, ?)
+        WHERE post_id = ?
+        `,[`?postID=${post_id}`,post_id])
+    return [result,result2]
 }

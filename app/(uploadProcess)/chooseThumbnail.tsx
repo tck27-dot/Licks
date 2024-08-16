@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Pressable,
+  Dimensions,
 } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,7 +22,7 @@ import Slider, {
   MarkerProps,
   SliderProps,
 } from "@react-native-community/slider";
-import MySlider from "@/components/MySlider";
+import ThumbnailSelector from "@/components/ThumbnailSelector";
 export default function chooseThumbnail() {
   let uid = "";
   const auth = getAuth();
@@ -35,78 +36,102 @@ export default function chooseThumbnail() {
   const [postID, setPostID] = useState<string | null>(null);
   const [duration, setDuration] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
-  const params = useGlobalSearchParams<{ postID: string; duration: string }>();
+  const params = useGlobalSearchParams<{
+    postID: string;
+    duration: string;
+    vidUri: string;
+  }>();
   const [isLoading, toggleLoading] = useState<boolean>(false);
-
+  const [isSubmitting, toggleSubmit] = useState<boolean>(false);
+  const [vidUri, setVidUri] = useState<string | null>(null);
+  const [opacity, setOpacity] = useState<number>(1);
   useEffect(() => {
     // Update the state with the postID value
     if (params.postID) {
       setPostID(params.postID);
       setDuration(params.duration);
+      setVidUri(params.vidUri);
     }
   }, [params]);
   console.log("From chooseThumbnail: ", postID, duration);
-  const SliderExample = (props: SliderProps) => {
-    const [value, setValue] = useState(0);
-    return (
-      <View style={{ alignItems: "center" }}>
-        <Text style={styles.text}>{value && +value.toFixed(3)}</Text>
-        {image && <Image style={styles.image} source={{ uri: image }} />}
-        <Slider
-          step={1000}
-          style={[styles.slider, props.style]}
-          {...props}
-          value={value}
-          maximumValue={duration ? Number(duration) : 27000}
-          minimumValue={0}
-          onValueChange={(value) => {
-            setValue(value);
-            // generateThumbnail();
-          }}
-        />
-      </View>
-    );
-  };
 
   function handleImage(image: string) {
-    setImage(image);
-    console.log(image);
+    return image;
   }
 
+  // Put back in after thumbnail implementation!!!!!
+  // !postID && !vidUri && alert("Error loading media");
   return (
-    // <LinearGradient
-    //   colors={["#833ab4", "#8589d6", "#fcb045"]}
-    //   start={{ x: 0.1, y: 0.2 }}
-    //   style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-    // >
-    <SafeAreaView className="flex-1  justify-center center bg-black">
-      <Text className="text-center mt-3 text-2xl font-bold text-white">
-        Choose Thumbnail
-      </Text>
-      <Text className="text-center font-medium text-xs px-7 py-4 text-[#bebcbc]">
-        Adjust the slider to find a moment to thumbnail
-      </Text>
-      <MySlider duration={38000} onImgGenerated={handleImage} />
-
-      <Pressable
-        onPress={() => toggleLoading(true)}
-        className="bg-[#833ab4] mt-4 p-2 rounded-lg my-0 mx-auto w-2/3"
+    <>
+      <SafeAreaView
+        style={{ opacity: opacity }}
+        className="flex-1  justify-center center bg-black"
       >
-        <Text className="text-center text-base text-white">
-          Choose and continue
+        <Text className="text-center mt-3 text-2xl font-bold text-white">
+          Choose Thumbnail
         </Text>
-      </Pressable>
+        <Text className="text-center font-medium text-xs px-7 py-4 text-[#bebcbc]">
+          Adjust the slider to find a moment to thumbnail
+        </Text>
+        {/* Put back in after Thumbnail implementation!!!! */}
+        {postID && vidUri && (
+          <ThumbnailSelector
+            duration={duration ? Number(duration) : 38000}
+            onImgGenerated={handleImage}
+            shouldShouldSubmit={isSubmitting}
+            postID={postID}
+            vidUri={vidUri}
+          />
+        )}
+        {/* <ThumbnailSelector
+          duration={duration ? Number(duration) : 38000}
+          onImgGenerated={handleImage}
+          shouldShouldSubmit={isSubmitting}
+          postID={postID ? postID : "1"}
+          vidUri={
+            vidUri
+              ? vidUri
+              : "https://licks-bucket-2.s3.us-east-1.amazonaws.com/6b0721557057e9520e1dbd52f4682e87"
+          }
+        /> */}
+        <Pressable
+          onPress={() => {
+            toggleLoading(true);
+            console.log(isSubmitting);
+            toggleSubmit(true);
+            setOpacity(0.7);
+          }}
+          className="bg-[#833ab4] mt-4 p-2 rounded-lg my-0 mx-auto w-2/3"
+        >
+          <Text className="text-center text-base text-white">
+            Choose and continue
+          </Text>
+        </Pressable>
 
-      {isLoading && (
-        <ActivityIndicator
-          size={"large"}
-          className="py-2"
-          animating={isLoading}
+        <Button
+          title={"Sitemap"}
+          onPress={() => router.navigate("/_sitemap")}
         />
-      )}
-      <Button title={"Sitemap"} onPress={() => router.navigate("/_sitemap")} />
-    </SafeAreaView>
-    // </LinearGradient>
+      </SafeAreaView>
+      <View
+        style={{
+          top: Dimensions.get("window").height / 2,
+          right: Dimensions.get("window").width / 2 - 20,
+          position: "absolute",
+          zIndex: 1,
+        }}
+        className=""
+      >
+        {isLoading && (
+          <ActivityIndicator
+            size={"large"}
+            className="py-2"
+            animating={isLoading}
+            color={"black"}
+          />
+        )}
+      </View>
+    </>
   );
 }
 

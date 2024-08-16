@@ -135,10 +135,11 @@ app.post("/update_media_file", async (req,res)=>{
     const [result3] = await set_post_media_id(insertId,post_media_id)
     res.status(201).send([result,result2,result3])
 })
+
  //Second step in upload
 app.post("/update_thumbnail", async (req,res)=>{
-    const {PostID,Uri} = req.body;
-    const [result] = await update_thumbnail(PostID,Uri);
+    const {PostID,ThumbnailUri} = req.body;
+    const [result] = await update_thumbnail(PostID,ThumbnailUri);
     res.status(201).send(result)
 })
 

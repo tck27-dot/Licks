@@ -119,10 +119,14 @@ export default function chooseVid() {
         .then((res) => {
           console.log(res);
           console.log("From vid: ", res[1].insertId);
-          router.setParams({ postID: res[1].insertId, duration: duration });
+          router.setParams({
+            postID: res[1].insertId,
+            duration: duration,
+            vidUri: uri,
+          });
           //testing which is triggering navigation
           router.push(
-            `./chooseThumbnail?postID=${res[1].insertId}&duration=${duration}`
+            `./chooseThumbnail?postID=${res[1].insertId}&duration=${duration}&vidUri=${uri}`
           );
           return res[1].insertId;
         });
