@@ -161,9 +161,10 @@ app.post("/update_sheet_music", async (req,res)=>{
  //Sends a object with all profile info
 app.post("/getUserInfo",async(req,res)=>{
     const {Uid} = req.body;
-    const db_id = uid_to_db_id(Uid);
-    const headerData = await headerData(db_id);
-    const postData = await postData(db_id);
+    const db_id = await uid_to_db_id(Uid);
+    const headData = await headerData(db_id);
+    const postsData = await postData(db_id);
+    res.status(201).send([headData,postsData])
 })
 app.use((err,req,res,next)=>{
     console.error(err.stack)
@@ -188,3 +189,5 @@ const num = await headerData(1)
 console.log(num.userData.last_name)
 const data = await postData(1)
 console.log(data)
+const val = await uid_to_db_id("dJmACN1jjjUaDDumWY6CIg3ZQwp2")
+console.log(val)
