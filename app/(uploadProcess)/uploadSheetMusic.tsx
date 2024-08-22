@@ -37,8 +37,8 @@ export default function uploadSheetMusic() {
     if (!result.canceled) {
       const resp = await fetch(result.assets[0].uri);
       const blob = await resp.blob();
-      const uri = await putMedia(blob);
-      postID && (await sheetMusicUriToDB(uri, postID));
+      const [uri, objKey] = await putMedia(blob);
+      postID && (await sheetMusicUriToDB(uri, postID, objKey));
       postID && router.setParams({ postID: postID });
       console.log("From sheetmusic: *******************");
       router.push(`./chooseCaption?postID=${postID}`);
@@ -64,10 +64,14 @@ export default function uploadSheetMusic() {
       .catch((err) => console.log(err));
     console.log("View img here: ", url.split("?")[0]);
     const uri: string = url.split("?")[0];
-    return uri;
+    return [uri, uri.split("/")[3]];
   }
 
-  async function sheetMusicUriToDB(uri: string, postID: string) {
+  async function sheetMusicUriToDB(
+    uri: string,
+    postID: string,
+    objKey: string
+  ) {
     try {
       const result = await fetch(
         "http://192.168.50.70:8084/update_sheet_music",
@@ -77,6 +81,7 @@ export default function uploadSheetMusic() {
           body: JSON.stringify({
             PostID: postID,
             Uri: uri,
+            ObjKey: objKey,
           }),
         }
       )

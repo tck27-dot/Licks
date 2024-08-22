@@ -168,19 +168,20 @@ export const set_post_id = async (db_id)=>{
     return result
 }
 /**
- * Adds uri and duration of a video to post_media table via INSERT statement
+ * Adds uri duration, and object key of a video to post_media table via INSERT statement
  * 
  *
  * 
  * @param {number} uri - The uri of the video file.
  * @param {number} duration - The duration in milliseconds of video.
+ * @param {string} ObjKey - The object key of the video
  * 
  */
-export const update_vid_uri = async (uri,duration)=>{
+export const update_vid_uri = async (uri,duration,ObjKey)=>{
     const result = await pool.query(`
-        INSERT INTO post_media (media_file,duration)
-        VALUES (?,?)
-        `,[uri,duration])
+        INSERT INTO post_media (media_file,duration,media_object_key)
+        VALUES (?,?,?)
+        `,[uri,duration,ObjKey])
     return result
 }
 /**
@@ -188,14 +189,15 @@ export const update_vid_uri = async (uri,duration)=>{
  *
  * @param {number} post_id - The value in the ID column of the post_media table.
  * @param {number} uri - The uri of the sheetmusic file.
+ * @param {number} objKey - The object key of the SheetMusic file.
  * 
  */
-export const update_sheet_music = async (post_id,uri)=>{
+export const update_sheet_music = async (post_id,uri,objKey)=>{
     const result = await pool.query(`
         UPDATE post_media
-        SET sheet_music_file = ?
+        SET sheet_music_file = ?, sheet_music_object_key = ?
         WHERE post_id = ?
-        `,[uri,post_id])
+        `,[uri,objKey,post_id])
     return result
 }
 
@@ -267,7 +269,7 @@ export const postData = async(db_id)=>{
     return {posts:result,}
 }
 
-export const update_thumbnail = async (post_id,uri)=>{
+export const update_thumbnail = async (post_id,uri,ObjKey)=>{
     const [result] = await pool.query(`
         UPDATE post_media
         SET thumbnail_file = ?
@@ -278,5 +280,54 @@ export const update_thumbnail = async (post_id,uri)=>{
         SET media_file = CONCAT(media_file, ?)
         WHERE post_id = ?
         `,[`?postID=${post_id}`,post_id])
-    return [result,result2]
+    const [result3] = await pool.query(`
+        UPDATE post_media 
+        SET thumbnail_object_key = ?
+        WHERE post_id = ?
+        `,[ObjKey,post_id])
+    return [result,result2,result3]
+}
+
+/**
+ * Returns the object key of a video file of a given post
+ * 
+ * @param {number} postID  - ID of post in post table
+ * @returns {null|Promise<string>} Object Key of Video
+ */
+export const getVideoKey = async(postID)=>{
+    const [result] = await pool.query(`
+        Select media_object_key FROM post_media
+        WHERE post_id = ?
+        `,[postID])
+    
+    return Object.values(result[0])[0]
+}
+
+/**
+ * Returns the object key of a Thumbnail file of a given post
+ * 
+ * @param {number} postID  - ID of post in post table
+ * @returns {null|Promise<string>} Object Key of Thumbnail
+ */
+export const getThumbnailKey = async(postID)=>{
+    const [result] = await pool.query(`
+        Select thumbnail_object_key FROM post_media
+        WHERE post_id = ?
+        `,[postID])
+    
+    return Object.values(result[0])[0]
+}
+
+/**
+ * Returns the object key of a SheetMusic file of a given post
+ * @param {number} postID  - ID of post in post table
+ * @returns {null|Promise<string>} Object Key of SheetMusic
+ */
+export const getSheetMusicKey = async(postID)=>{
+    const [result] = await pool.query(`
+        Select sheet_music_object_key FROM post_media
+        WHERE post_id = ?
+        `,[postID])
+    
+    return Object.values(result[0])[0]
 }

@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router, Link, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 export default function chooseVid() {
   const router = useRouter();
@@ -66,13 +67,14 @@ export default function chooseVid() {
       .catch((err) => console.log(err));
     console.log("View img here: ", url.split("?")[0]);
     const uri: string = url.split("?")[0];
-    return uri;
+    const objKey: string = uri.split("/")[3];
+    return [uri, objKey];
   }
 
   const pickImage = async () => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
         allowsEditing: true,
         aspect: [4, 3],
         quality: 1,
@@ -86,17 +88,22 @@ export default function chooseVid() {
         resp.ok && console.log("Step 1 Good!");
         const blob = await resp.blob();
         blob && console.log("Step 2 ok!");
-        const uri = await putMedia(blob);
+        const [uri, objKey] = await putMedia(blob);
         uri && console.log("Uri ok!");
         result.assets[0].duration &&
-          (await vidUriToDB(uri, uid, result.assets[0].duration));
+          (await vidUriToDB(uri, uid, result.assets[0].duration, objKey));
       }
     } catch (e) {
       console.log("Pick Image error: ", e);
     }
   };
 
-  async function vidUriToDB(uri: string, uid: string, duration: number) {
+  async function vidUriToDB(
+    uri: string,
+    uid: string,
+    duration: number,
+    objKey: string
+  ) {
     try {
       const result = await fetch(
         "http://192.168.50.70:8084/update_media_file",
@@ -107,6 +114,7 @@ export default function chooseVid() {
             Uid: uid,
             Uri: uri,
             Duration: duration,
+            ObjKey: objKey,
           }),
         }
       )
@@ -163,10 +171,9 @@ export default function chooseVid() {
             },
           ]);
         }}
-        style={{ position: "absolute", top: "5%", left: "0%" }}
-        className="bg-[#fcb045] mt-4 p-1 rounded-lg w-1/4"
+        style={{ position: "absolute", top: "7%", left: "7%" }}
       >
-        <Text className="text-center text-base text-white">Quit</Text>
+        <AntDesign name="closecircle" size={50} color="white" />
       </TouchableOpacity>
 
       <Text className="text-center mt-3 text-2xl font-normal text-white px-7 py-7">

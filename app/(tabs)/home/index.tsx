@@ -52,6 +52,15 @@ export default function Tab() {
   ]);
   return (
     <View style={styles.container}>
+      <Text
+        style={{
+          top: Dimensions.get("window").height * 0.08,
+          left: Dimensions.get("window").width * 0.08,
+        }}
+        className="z-10 absolute text-center text-white opacity-80 font-semibold text-3xl"
+      >
+        Vidz
+      </Text>
       <FlatList
         data={uris}
         renderItem={({ item, index }) => (

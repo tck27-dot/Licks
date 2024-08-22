@@ -1,7 +1,7 @@
 import express from 'express'
 // import {getNotes,getNote,createNote} from './database.js'
 // import { addNewUser,createUserProfile,configBio,addUserName,updateProfileImg , addFullName} from './database.js'
-import {generateURL,uploadVid,uploadImg} from './s3.js'
+import {generateURL,uploadVid,uploadImg,generateGetUrl} from './s3.js'
 import {
     addNewUser,
     get_app_user_length,
@@ -20,7 +20,10 @@ import {
     update_caption,
     headerData,
     postData,
-    update_thumbnail
+    update_thumbnail,
+    getVideoKey,
+    getSheetMusicKey,
+    getThumbnailKey
 } from "./database.js"
 import {promisify} from "util"
 import cors from "cors";
@@ -73,7 +76,7 @@ app.post("/addUserName", async (req,res)=>{
 
 
 app.get("/s3Url", async (req,res)=>{
-    const url = await generateURL()
+    const [url] = await generateURL();
     res.send({url})
 })
 
@@ -126,10 +129,10 @@ app.post("/uploadVideo",async (req,res)=>{
 })
  //First step in upload
 app.post("/update_media_file", async (req,res)=>{
-    const {Uid,Uri,Duration} = req.body;
+    const {Uid,Uri,Duration,ObjKey} = req.body;
     const db_id = await uid_to_db_id(Uid);
     const [result] = await set_post_id(db_id);
-    const [result2] = await update_vid_uri(Uri,Duration);
+    const [result2] = await update_vid_uri(Uri,Duration,ObjKey);
     const {insertId} = result;
     const post_media_id = result2.insertId
     const [result3] = await set_post_media_id(insertId,post_media_id)
@@ -138,15 +141,15 @@ app.post("/update_media_file", async (req,res)=>{
 
  //Second step in upload
 app.post("/update_thumbnail", async (req,res)=>{
-    const {PostID,ThumbnailUri} = req.body;
-    const [result] = await update_thumbnail(PostID,ThumbnailUri);
+    const {PostID,ThumbnailUri,ObjKey} = req.body;
+    const [result] = await update_thumbnail(PostID,ThumbnailUri,ObjKey);
     res.status(201).send(result)
 })
 
 //Third step in upload
 app.post("/update_sheet_music", async (req,res)=>{
-    const {PostID,Uri} = req.body;
-    const [result] = await update_sheet_music(PostID,Uri);
+    const {PostID,Uri,ObjKey} = req.body;
+    const [result] = await update_sheet_music(PostID,Uri,ObjKey);
     res.status(201).send(result)
 })
 
@@ -165,6 +168,14 @@ app.post("/getUserInfo",async(req,res)=>{
     const headData = await headerData(db_id);
     const postsData = await postData(db_id);
     res.status(201).send([headData,postsData])
+})
+//Returns url for S3 bucket file given Object Key
+app.get("/getVideoFile/:postID", async (req,res)=>{
+    const postID = req.params.postID;
+    const ObjKey = await getVideoKey(Number(postID));
+    const url = await generateGetUrl(ObjKey);
+    res.status(201).send({url});
+
 })
 app.use((err,req,res,next)=>{
     console.error(err.stack)
@@ -185,9 +196,9 @@ app.listen(PORT,HOST,()=>{
 // const y = await uid_to_db_id("dJmACN1jjjUaDDumWY6CIg3ZQwp2")
 // console.log(y)
 
-const num = await headerData(1)
-console.log(num.userData.last_name)
-const data = await postData(1)
-console.log(data)
-const val = await uid_to_db_id("dJmACN1jjjUaDDumWY6CIg3ZQwp2")
-console.log(val)
+// const num = await headerData(1)
+// console.log(num.userData.last_name)
+// const data = await postData(1)
+// console.log(data)
+// const val = await uid_to_db_id("dJmACN1jjjUaDDumWY6CIg3ZQwp2")
+// console.log(val)

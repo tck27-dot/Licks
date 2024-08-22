@@ -87,6 +87,7 @@ export default function ThumbnailSelector({
           body: JSON.stringify({
             ThumbnailUri: finalUri,
             PostID: postID,
+            ObjKey: finalUri.split("/")[3],
           }),
         };
         const result2 = await fetch(

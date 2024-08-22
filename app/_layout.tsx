@@ -49,7 +49,10 @@ export default function Layout() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="(signupProcess)" options={{ headerShown: false }} />
-      <Stack.Screen name="(uploadProcess)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="(uploadProcess)"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
     </Stack>
   );
 }

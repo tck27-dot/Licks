@@ -50,7 +50,6 @@ export default function chooseThumbnail() {
     if (params.postID) {
       setPostID(params.postID);
       setDuration(params.duration);
-      setVidUri(params.vidUri);
     }
   }, [params]);
   console.log("From chooseThumbnail: ", postID, duration);
@@ -59,6 +58,26 @@ export default function chooseThumbnail() {
     return image;
   }
 
+  useEffect(() => {
+    const getVid = async () => {
+      if (params.postID) {
+        try {
+          const result = await fetch(
+            `http://192.168.50.70:8084/getVideoFile/${params.postID}`
+          );
+          if (result.ok) {
+            const data = await result.json();
+            const { url } = data;
+            url && setVidUri(url);
+            console.log(url);
+          }
+        } catch (e) {
+          console.log("Error fetching video: ", e);
+        }
+      }
+    };
+    getVid();
+  }, [postID]);
   // Put back in after thumbnail implementation!!!!!
   // !postID && !vidUri && alert("Error loading media");
   return (
