@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, router } from "expo-router";
+import React, { useState, useEffect } from "react";
+import { Link, router, useRouter } from "expo-router";
 import {
   Text,
   View,
@@ -7,15 +7,47 @@ import {
   Alert,
   TextInput,
   Button,
+  Pressable,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { LinearGradient } from "expo-linear-gradient";
+// import {
+//   saveLoginState,
+//   getLoginState,
+//   removeLoginState,
+// } from "@/components/utils/asyncStorage";
+// import { useGoogleSignIn } from "@/components/utils/googleSignIn";
 export default function login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const { promptAsync, handleGoogleSignIn } = useGoogleSignIn();
+  const router = useRouter();
+  // useEffect(() => {
+  //   const handleSignIn = async () => {
+  //     const userCredential = await handleGoogleSignIn();
+  //     if (userCredential) {
+  //       router.replace("/home"); // Navigate to home screen after successful login
+  //     }
+  //   };
 
-  //Handles sign up logic
+  //   handleSignIn();
+  // }, [handleGoogleSignIn, router]);
+
+  // useEffect(() => {
+  //   const checkLoginState = async () => {
+  //     const userToken = await getLoginState();
+  //     if (userToken) {
+  //       setIsLoggedIn(true);
+  //       router.push("/home"); // Navigate to home if logged in
+  //     }
+  //   };
+
+  //   checkLoginState();
+  // }, []);
+
+  //Handles login logic
   const handlePressSignin = () => {
     const auth = getAuth();
     signInWithEmailAndPassword(auth, email, password)
@@ -80,12 +112,12 @@ export default function login() {
             />
           </View>
 
-          <TouchableOpacity
+          <Pressable
             onPress={handlePressSignin}
             className="bg-[#833ab4] mt-4 p-2 rounded-lg"
           >
             <Text className="text-center text-base text-white">Login</Text>
-          </TouchableOpacity>
+          </Pressable>
           <Button
             title={"Sitemap"}
             onPress={() => router.navigate("/_sitemap")}

@@ -23,7 +23,8 @@ import {
     update_thumbnail,
     getVideoKey,
     getSheetMusicKey,
-    getThumbnailKey
+    getThumbnailKey,
+    getPostData
 } from "./database.js"
 import {promisify} from "util"
 import cors from "cors";
@@ -167,7 +168,8 @@ app.post("/getUserInfo",async(req,res)=>{
     const db_id = await uid_to_db_id(Uid);
     const headData = await headerData(db_id);
     const postsData = await postData(db_id);
-    res.status(201).send([headData,postsData])
+    
+    res.status(201).send([headData,[postsData.length,postsData]])
 })
 //Returns url for S3 bucket file given Object Key
 app.get("/getVideoFile/:postID", async (req,res)=>{
@@ -175,6 +177,14 @@ app.get("/getVideoFile/:postID", async (req,res)=>{
     const ObjKey = await getVideoKey(Number(postID));
     const url = await generateGetUrl(ObjKey);
     res.status(201).send({url});
+
+})
+
+app.get("/getposts/:uid", async (req,res)=>{
+    const uid = req.params.uid;
+    const db_id = await uid_to_db_id(uid)
+    const posts = await getPostData(db_id);
+    res.status(201).send(posts);
 
 })
 app.use((err,req,res,next)=>{
@@ -202,3 +212,6 @@ app.listen(PORT,HOST,()=>{
 // console.log(data)
 // const val = await uid_to_db_id("dJmACN1jjjUaDDumWY6CIg3ZQwp2")
 // console.log(val)
+
+// const res = await getPostData(1);
+// console.log(res)

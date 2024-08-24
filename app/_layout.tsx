@@ -1,5 +1,6 @@
 import { Stack } from "expo-router/stack";
 import { initializeApp } from "firebase/app";
+import { PostProvider } from "@/components/utils/PostContext";
 import {
   getFirestore,
   collection,
@@ -8,8 +9,11 @@ import {
   setDoc,
 } from "firebase/firestore/lite";
 import { getAuth } from "firebase/auth";
-import firebase from "firebase/app";
-
+// import firebase from "firebase/app";
+// import { initializeAuth } from "firebase/auth";
+// import * as firebaseAuth from "firebase/auth";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+// import { getApps, getApp } from "firebase/app";
 const firebaseConfig = {
   apiKey: "AIzaSyALwYesSaPkDhl-hkNnNnEnruEmUxIuIw8",
   authDomain: "licks-5edf4.firebaseapp.com",
@@ -22,8 +26,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const auth = getAuth(app);
 
 //Creates collection and document
 //daily special is the collection name
@@ -42,17 +44,27 @@ export const auth = getAuth(app);
 // }
 
 // writeDailySpecial();
+
+// const reactNativePersistence = (firebaseAuth as any).getReactNativePersistence;
+
+// // initialize auth
+// const auth = initializeAuth(app, {
+//   persistence: reactNativePersistence(AsyncStorage),
+// });
+
 export default function Layout() {
   return (
-    <Stack initialRouteName="index">
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="login" options={{ headerShown: false }} />
-      <Stack.Screen name="(signupProcess)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="(uploadProcess)"
-        options={{ headerShown: false, gestureEnabled: false }}
-      />
-    </Stack>
+    <PostProvider>
+      <Stack initialRouteName="index">
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="(signupProcess)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(uploadProcess)"
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+      </Stack>
+    </PostProvider>
   );
 }

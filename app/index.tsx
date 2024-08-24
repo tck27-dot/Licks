@@ -3,24 +3,42 @@ import { Link, router } from "expo-router";
 import { Text, View, TouchableOpacity, TextInput, Button } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import * as firebaseAuth from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from "react-native";
 import { useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
-
+// import {
+//   saveLoginState,
+//   getLoginState,
+//   removeLoginState,
+// } from "@/components/utils/asyncStorage";
+// import { initializeAuth } from "firebase/auth";
+// import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 export default function index() {
   let currUserId = "";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSuccess, setSuccess] = useState(false);
-  const requestOptions = {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      Name: getAuth().currentUser?.displayName,
-      Uid: getAuth().currentUser?.uid,
-    }),
-  };
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // useEffect(() => {
+  //   const checkLoginState = async () => {
+  //     const userToken = await getLoginState();
+  //     if (userToken) {
+  //       setIsLoggedIn(true);
+  //       router.push("/home"); // Navigate to home if logged in
+  //     }
+  //   };
+  //   checkLoginState();
+  // }, []);
+  // const requestOptions = {
+  //   method: "POST",
+  //   headers: { "Content-Type": "application/json" },
+  //   body: JSON.stringify({
+  //     Name: getAuth().currentUser?.displayName,
+  //     Uid: getAuth().currentUser?.uid,
+  //   }),
+  // };
   const updateDB = async (id: string, name: string) => {
     try {
       const result = await fetch("http://192.168.50.70:8084/", {

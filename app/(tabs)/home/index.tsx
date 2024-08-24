@@ -62,12 +62,19 @@ export default function Tab() {
         Vidz
       </Text>
       <FlatList
+        //ref={videoO}
         data={uris}
+        //initialScrollIndex={3}
         renderItem={({ item, index }) => (
           <Item item={item} shouldPlay={index === currentViewableItemIndex} />
         )}
         keyExtractor={(item) => item}
         pagingEnabled
+        getItemLayout={(data, index) => ({
+          length: Dimensions.get("screen").height - 79,
+          offset: (Dimensions.get("screen").height - 79) * index,
+          index,
+        })}
         horizontal={false}
         showsVerticalScrollIndicator={false}
         viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}

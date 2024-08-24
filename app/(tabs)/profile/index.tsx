@@ -12,7 +12,10 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useState, useEffect } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import PostGrid from "@/components/PostGrid";
+import Post from "@/types/post";
+import { usePosts } from "@/components/utils/PostContext";
 export default function profile() {
+  const { posts, addPosts } = usePosts();
   const [uid, setUid] = useState<null | string>(null);
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
@@ -31,7 +34,8 @@ export default function profile() {
   const [firstName, setFirstName] = useState<string | null>(null);
   const [lastName, setLastName] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  console.log(uid, follower, following, Videos, firstName, lastName);
+  const [postInfo, setPostInfo] = useState<Post[] | null>(null);
+  //console.log(uid, follower, following, Videos, firstName, lastName);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -57,12 +61,13 @@ export default function profile() {
         if (results.ok) {
           console.log(201);
           const data = await results.json();
-          console.log(data);
+          //console.log(data);
           const userData = data[0].userData;
+          const postData = data[1];
+
           setBio(userData.bio);
           setFollowers(data[0].followers);
           setFollowing(data[0].following);
-          setVideos(data.videos);
           setProfileName(userData.profile_name);
           setFirstName(userData.first_name);
           setLastName(userData.last_name);
@@ -72,12 +77,30 @@ export default function profile() {
         console.log(err);
       }
     }
+    async function getPosts(uid: string) {
+      console.log("Running get Posts...");
+      try {
+        const response = await fetch(
+          "http://192.168.50.70:8084/getposts/" + uid
+        );
+        if (response.ok) {
+          console.log(201);
+          const data = await response.json();
+          addPosts(data);
+          setPostInfo(data);
+          setVideos(data.length);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
     if (uid) {
       console.log("ran getdeets");
       getDetails(uid);
+      getPosts(uid);
     }
   }, [uid, refreshing]);
-
+  //postInfo && console.log(postInfo);
   return (
     <SafeAreaView style={{ backgroundColor: "white" }}>
       <ScrollView
@@ -140,7 +163,7 @@ export default function profile() {
         </View>
         {/* Post Grid */}
         <View>
-          <PostGrid isEmpty={true} />
+          <PostGrid postData={postInfo} isEmpty={Videos ? false : true} />
         </View>
       </ScrollView>
     </SafeAreaView>

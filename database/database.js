@@ -1,6 +1,6 @@
 import mysql from 'mysql2'
 import dotenv from 'dotenv';
-
+import { generateGetUrl } from './s3.js';
 dotenv.config()
 export const pool = mysql.createPool({
     host: process.env.MYSQL_HOST,
@@ -257,7 +257,11 @@ export const headerData = async(db_id)=>{
         `,[db_id])
     return {followers: result.length, following: result2.length, userData:result3}
 }
-
+/**
+ * Returns all the posts of a given user (only data post table)
+ * @param {string} db_id - ID of a given user
+ * @returns 
+ */
 export const postData = async(db_id)=>{
     const [result] = await pool.query(`
         Select * FROM post
@@ -266,7 +270,13 @@ export const postData = async(db_id)=>{
     // const [result2] = await pool.query(`
     //     Select
     //     `)
-    return {posts:result,}
+    const [result2] = await pool.query(`
+        SELECT post.created_by_user_id, post_media.thumbnail_object_key 
+        FROM post 
+        CROSS JOIN post_media 
+        WHERE post.created_by_user_id = post_media.post_id;
+        `)
+    return result
 }
 
 export const update_thumbnail = async (post_id,uri,ObjKey)=>{
@@ -330,4 +340,45 @@ export const getSheetMusicKey = async(postID)=>{
         `,[postID])
     
     return Object.values(result[0])[0]
+}
+
+/**
+ * Returns all posts by a given user 
+ * @param {number} db_id - db_id of a given user
+ * @returns {Promise<array>} Array of objects where each object presents a row of post table and
+ * post media table entries cross joined
+ */
+export const getPostData = async(db_id)=>{
+    let [result] = await pool.query(`        
+        SELECT * FROM (
+        SELECT * FROM post WHERE created_by_user_id = ?) as posts
+        CROSS JOIN post_media WHERE post_media.post_id = posts.ID
+        `,[db_id])
+    
+
+        let uris = result.map(async(obj) => {
+            const thumbObjKey = obj.thumbnail_object_key
+            const vidObjKey = obj.media_object_key
+            const thumbnailUri = await generateGetUrl(thumbObjKey);
+            const vidUri = await generateGetUrl(vidObjKey)
+            return [thumbnailUri,vidUri]
+        });
+        
+        let data = await Promise.all(uris)
+        for(let i =0; i<data.length;i++){
+            result[i].thumbnail_file = data[i][0];
+            result[i].media_file = data[i][1]      
+        }
+    //     result.forEach(async obj=>{
+    //     //Generate new uri using S3 function
+    //     const objKey = obj.thumbnail_object_key
+    //     //Plug it into thumbnail_file
+    //     // console.log("hehehe")
+    //     //const uri = await generateGetUrl(objKey);
+    //     // console.log(uri)
+    //     obj.thumbnail_file = 0;
+       
+    // })
+    
+    return result
 }
