@@ -18,6 +18,7 @@ export default function PostGrid({ isEmpty, isCentered, postData }: Props) {
       <View style={{ flex: 1, flexDirection: "row", flexWrap: "wrap" }}>
         {posts.map((obj: Post, index) => (
           <Pressable
+            key={obj.post_id}
             onPress={() => {
               console.log(index);
               router.setParams({ postPlayerID: index });

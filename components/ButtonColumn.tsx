@@ -1,5 +1,5 @@
 import { View, Text, ViewStyle, Pressable } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -7,6 +7,7 @@ import { StyleSheet } from "react-native";
 import { StyleProp } from "react-native";
 import { TextStyle } from "react-native";
 import { router, Link } from "expo-router";
+import Comments from "./Comments";
 
 //Think about refactoring code in the future so that each
 //Button has its own component tsx file. If someone presses
@@ -18,6 +19,8 @@ type Props = {
 };
 
 export default function ButtonColumn({ style }: Props) {
+  const [visible, setVisibility] = useState<boolean>(true);
+
   return (
     <View style={style}>
       <View style={styles.container}>
@@ -36,7 +39,7 @@ export default function ButtonColumn({ style }: Props) {
         </Pressable>
         <Pressable
           onPress={() => {
-            alert("Soon this will trigger the comments section!");
+            setVisibility((prev) => !prev);
           }}
         >
           <FontAwesome
@@ -45,6 +48,7 @@ export default function ButtonColumn({ style }: Props) {
             size={40}
             color="white"
           />
+          <Comments isVisible={visible} />
         </Pressable>
         <Link href="./home/sheetMusicModal">
           {/* <Pressable
