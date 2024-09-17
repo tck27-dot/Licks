@@ -38,6 +38,7 @@ import PostDescription from "@/components/PostDescription";
 import { usePosts } from "@/components/utils/PostContext";
 import { onAuthStateChanged, getAuth } from "firebase/auth";
 import Post from "@/types/post";
+
 let uris = [
   "https://d49cod5usxzn4.cloudfront.net/Beat%20it%20Solo%20MJ%20&%20Eddie%20Van%20Halen.mp4",
   "https://d49cod5usxzn4.cloudfront.net/Carnival%20-Ye%20Cover.mp4",
@@ -67,6 +68,8 @@ export default function Tab() {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [postInfo, setPostInfo] = useState<Post[] | null>(null);
   //console.log(uid, follower, following, Videos, firstName, lastName);
+  const ip = process.env.EXPO_PUBLIC_IP_ADDRESS;
+  console.log(ip);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -84,10 +87,7 @@ export default function Tab() {
             Uid: uid,
           }),
         };
-        const results = await fetch(
-          "http://192.168.50.70:8084/getUserInfo",
-          params
-        );
+        const results = await fetch(`http://${ip}:8084/getUserInfo`, params);
 
         if (results.ok) {
           console.log(201);
@@ -111,15 +111,12 @@ export default function Tab() {
     async function getPosts(uid: string) {
       console.log("Running get Posts...");
       try {
-        const response = await fetch(
-          "http://192.168.50.70:8084/getposts/" + uid
-        );
+        const response = await fetch(`http://${ip}:8084/getposts/ ` + uid);
         if (response.ok) {
           console.log(201);
           const data = await response.json();
           addPosts(data);
           setPostInfo(data);
-          setVideos(data.length);
         }
       } catch (e) {
         console.log(e);
@@ -143,22 +140,16 @@ export default function Tab() {
   ]);
   return (
     <View style={{ backgroundColor: "black" }}>
-      <ScrollView
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        style={styles.container}
+      <Text
+        style={{
+          top: Dimensions.get("window").height * 0.08,
+          left: Dimensions.get("window").width * 0.08,
+        }}
+        className="z-10 absolute text-center text-white opacity-80 font-semibold text-3xl"
       >
-        <Text
-          style={{
-            top: Dimensions.get("window").height * 0.08,
-            left: Dimensions.get("window").width * 0.08,
-          }}
-          className="z-10 absolute text-center text-white opacity-80 font-semibold text-3xl"
-        >
-          Vidz
-        </Text>
-      </ScrollView>
+        Vidz
+      </Text>
+
       <FlatList
         //ref={videoO}
         data={posts}
@@ -166,12 +157,21 @@ export default function Tab() {
         renderItem={({ item, index }) => (
           <Item
             key={index}
-            item={item.media_file}
+            item={item}
             shouldPlay={index === currentViewableItemIndex}
           />
         )}
         keyExtractor={(item) => item.post_id}
         pagingEnabled
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        refreshControl={
+          <RefreshControl
+            tintColor={"white"}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
         getItemLayout={(data, index) => ({
           length: Dimensions.get("screen").height - 79,
           offset: (Dimensions.get("screen").height - 79) * index,
@@ -184,7 +184,7 @@ export default function Tab() {
     </View>
   );
 }
-const Item = ({ item, shouldPlay }: { shouldPlay: boolean; item: string }) => {
+const Item = ({ item, shouldPlay }: { shouldPlay: boolean; item: Post }) => {
   const video = React.useRef<any>(null);
   const [status, setStatus] = useState<any>(null);
   const [visible, setVisibility] = useState<boolean>(false);
@@ -193,7 +193,7 @@ const Item = ({ item, shouldPlay }: { shouldPlay: boolean; item: string }) => {
 
     if (shouldPlay) {
       video.current.playAsync();
-      router.setParams({ currentPostID: item });
+      router.setParams({ currentPostID: item.ID });
     } else {
       video.current.pauseAsync();
       video.current.setPositionAsync(0);
@@ -222,7 +222,7 @@ const Item = ({ item, shouldPlay }: { shouldPlay: boolean; item: string }) => {
       <View style={styles.VideoContainer}>
         <Video
           ref={video}
-          source={{ uri: item }}
+          source={{ uri: item.media_file }}
           style={styles.video}
           isLooping
           resizeMode={ResizeMode.COVER}

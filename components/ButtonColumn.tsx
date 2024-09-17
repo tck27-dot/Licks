@@ -8,6 +8,7 @@ import { StyleProp } from "react-native";
 import { TextStyle } from "react-native";
 import { router, Link } from "expo-router";
 import Comments from "./Comments";
+import LikeButton from "./LikeButton";
 
 //Think about refactoring code in the future so that each
 //Button has its own component tsx file. If someone presses
@@ -20,23 +21,13 @@ type Props = {
 
 export default function ButtonColumn({ style }: Props) {
   const [visible, setVisibility] = useState<boolean>(true);
-
+  const [isLiked, toggleLiked] = useState<boolean | undefined>(undefined);
   return (
     <View style={style}>
       <View style={styles.container}>
-        <Pressable
-          onPress={() => {
-            alert("Like added!");
-          }}
-        >
-          <AntDesign
-            style={styles.Button}
-            className={"m-"}
-            name="like2"
-            size={40}
-            color="white"
-          />
-        </Pressable>
+        {/* Like Button */}
+        <LikeButton />
+        {/* Comments Button */}
         <Pressable
           onPress={() => {
             setVisibility((prev) => !prev);
@@ -50,6 +41,7 @@ export default function ButtonColumn({ style }: Props) {
           />
           <Comments isVisible={visible} />
         </Pressable>
+        {/* SheetMusic Button */}
         <Link href="./home/sheetMusicModal">
           {/* <Pressable
             onPress={() => {

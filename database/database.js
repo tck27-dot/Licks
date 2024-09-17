@@ -369,16 +369,39 @@ export const getPostData = async(db_id)=>{
             result[i].thumbnail_file = data[i][0];
             result[i].media_file = data[i][1]      
         }
-    //     result.forEach(async obj=>{
-    //     //Generate new uri using S3 function
-    //     const objKey = obj.thumbnail_object_key
-    //     //Plug it into thumbnail_file
-    //     // console.log("hehehe")
-    //     //const uri = await generateGetUrl(objKey);
-    //     // console.log(uri)
-    //     obj.thumbnail_file = 0;
-       
-    // })
+    
+    
+    return result
+}
+
+/**
+ * Increase Like count of a given postID
+ * 
+ * @param {number} postID  - ID of post in post table
+ * @returns  Result of query
+ */
+export const addLike = async(postID)=>{
+    const [result] = await pool.query(`
+        UPDATE post
+        SET likes = likes +1
+        WHERE ID = ?
+        `,[postID])
+    
+    return result
+}
+
+/**
+ * Decrease Like count of a given postID
+ * 
+ * @param {number} postID  - ID of post in post table
+ * @returns Result of query
+ */
+export const removeLike = async(postID)=>{
+    const [result] = await pool.query(`
+        UPDATE post
+        SET likes = likes -1
+        WHERE ID = ?
+        `,[postID])
     
     return result
 }

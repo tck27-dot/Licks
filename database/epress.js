@@ -24,7 +24,9 @@ import {
     getVideoKey,
     getSheetMusicKey,
     getThumbnailKey,
-    getPostData
+    getPostData,
+    addLike,
+    removeLike
 } from "./database.js"
 import {promisify} from "util"
 import cors from "cors";
@@ -185,6 +187,21 @@ app.get("/getposts/:uid", async (req,res)=>{
     const db_id = await uid_to_db_id(uid)
     const posts = await getPostData(db_id);
     res.status(201).send(posts);
+
+})
+//Change Like Count
+    //Increase Like Count
+app.post("/addLike", async (req,res)=>{
+    const {postID} = req.body;
+    const result = await addLike(postID); 
+    res.status(201).send(result);
+
+})
+    //Decrese Like Count
+app.post("/removeLike", async (req,res)=>{
+    const {postID} = req.body;
+    const result = await removeLike(postID);
+    res.status(201).send(result);
 
 })
 app.use((err,req,res,next)=>{

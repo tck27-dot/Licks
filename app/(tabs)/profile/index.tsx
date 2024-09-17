@@ -15,6 +15,8 @@ import PostGrid from "@/components/PostGrid";
 import Post from "@/types/post";
 import { usePosts } from "@/components/utils/PostContext";
 export default function profile() {
+  const ip = process.env.EXPO_PUBLIC_IP_ADDRESS;
+  console.log("Ip in profile: ", ip);
   const { posts, addPosts } = usePosts();
   const [uid, setUid] = useState<null | string>(null);
   const auth = getAuth();
@@ -53,10 +55,7 @@ export default function profile() {
             Uid: uid,
           }),
         };
-        const results = await fetch(
-          "http://192.168.50.70:8084/getUserInfo",
-          params
-        );
+        const results = await fetch(`http://${ip}:8084/getUserInfo`, params);
 
         if (results.ok) {
           console.log(201);
@@ -80,9 +79,7 @@ export default function profile() {
     async function getPosts(uid: string) {
       console.log("Running get Posts...");
       try {
-        const response = await fetch(
-          "http://192.168.50.70:8084/getposts/" + uid
-        );
+        const response = await fetch(`http://${ip}:8084/getposts/` + uid);
         if (response.ok) {
           console.log(201);
           const data = await response.json();
